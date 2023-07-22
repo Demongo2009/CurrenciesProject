@@ -1,0 +1,27 @@
+<div class="card my-5">
+  <div class="card-body">
+    <div class="alert alert-danger" role="alert" ng-hide="error.message == ''">
+      {{ error.message }}
+    </div>
+    <table class="table table-bordered table-striped">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Currency</th>
+          <th scope="col">Value</th>
+          <th scope="col">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let request of requests; index as i">
+          <td>{{ i }}</td>
+          <td>{{ request.name }}</td>
+          <td>{{ request.currency }}</td>
+          <td>{{ request.value }}</td>
+          <td>{{ request.date }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
