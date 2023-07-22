@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.util.stream.*;
+import org.springframework.context.annotation.*;
 
 @SpringBootApplication
 public class CurrenciesProjectApplication {
@@ -38,9 +39,18 @@ public class CurrenciesProjectApplication {
 	private static RestTemplate restTemplate;
 
 	public static void main(String[] args) {
-		objectMapper.registerModule(new JavaTimeModule());
-		restTemplate = new RestTemplate();
 		SpringApplication.run(CurrenciesProjectApplication.class, args);
 	}
 
+	@Bean
+	public RestTemplate getRestTemplate(){
+		return new RestTemplate();
+	}
+
+	@Bean
+	public ObjectMapper getObjectMapper(){
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		return objectMapper;
+	}
 }
