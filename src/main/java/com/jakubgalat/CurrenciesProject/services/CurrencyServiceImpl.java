@@ -31,18 +31,28 @@ import java.util.stream.*;
 
 @Service
 public class CurrencyServiceImpl implements CurrencyService {
-
+  @Autowired
   private RestTemplate restTemplate;
+  @Autowired
+  private ObjectMapper objectMapper;
+
   private Logger logger = LoggerFactory.getLogger(CurrencyServiceImpl.class);
-  private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
 	private CurrencyRequestRepository currencyRequestRepository;
 
+  @Autowired
+  public CurrencyServiceImpl(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    this.restTemplate = restTemplate;
+    this.objectMapper = objectMapper;
+  }
+
+  public CurrencyServiceImpl(){
+
+  }
+
   @PostConstruct
   public void init(){
-    restTemplate = new RestTemplate();
-    objectMapper.registerModule(new JavaTimeModule());
     logger.info("CurrencyServiceImpl - Initialized.");
   }
 
@@ -53,8 +63,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     String uri = getCurrencyExchangeRateURI();
     Optional<ValuePayload> valueFromURI = Optional.empty();
 
-    ResponseEntity<?> response = makeGetRequest(uri, String.class);
-    String currenciesString = (String) response.getBody();
+    String currenciesString = makeGetRequestAndGetCurrenciesString(uri, String.class);
     CurrencyTableA currenciesTableA = objectMapper.readValue(currenciesString.substring(1, currenciesString.length()-1), CurrencyTableA.class);
 
     valueFromURI = extractValuePayloadFromCurrencyTableA(currency, currenciesTableA);
@@ -84,7 +93,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 
   }
 
-  private void persistUserRequestDTO(ValuePayload valuePayload, String currency, String name) {
+  protected void persistUserRequestDTO(ValuePayload valuePayload, String currency, String name) {
 
     CurrencyRequestDTO currencyRequestDTO = new CurrencyRequestDTO(null,currency, name, LocalDateTime.now(), valuePayload.getValue());
     try{
@@ -97,7 +106,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     return;
   }
 
-  private Optional<ValuePayload> extractValuePayloadFromCurrencyTableA(String currency, CurrencyTableA currenciesTableA) {
+  protected Optional<ValuePayload> extractValuePayloadFromCurrencyTableA(String currency, CurrencyTableA currenciesTableA) {
 
     Double result = null;
 
@@ -131,12 +140,12 @@ public class CurrencyServiceImpl implements CurrencyService {
     return Optional.of(new ValuePayload(mid));
   }
 
-  private String getCurrencyExchangeRateURI() {
+  protected String getCurrencyExchangeRateURI() {
 
     return "http://api.nbp.pl/api/exchangerates/tables/A?format=json";
   }
 
-  private ResponseEntity<?> makeGetRequest(String uri, Class<?> returnClass) throws HttpClientErrorException, RuntimeException, GetHttpRequestFailedException{
+  protected String makeGetRequestAndGetCurrenciesString(String uri, Class<?> returnClass) throws HttpClientErrorException, RuntimeException, GetHttpRequestFailedException{
 
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -151,11 +160,9 @@ public class CurrencyServiceImpl implements CurrencyService {
       throw new GetHttpRequestFailedException("GET Request to \"" + uri + "\" failed! StatusCode: " + statusCode.toString());
     }
 
-    return result;
+    String currenciesString = (String) result.getBody();
+
+    return currenciesString;
   }
-
-
-
-
 
 }
