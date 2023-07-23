@@ -111,15 +111,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     Double result = null;
 
     List<Rate> rates = currenciesTableA.getRates();
-
-    // wouldnt work for some reason cannot find symbol [ERROR]   symbol:   variable stream
-    // List<Rate> currencyRates = rates.stream.filter((a) -> {a.getCode().equals(currecny);}).collect(Collectors.toList());
-    List<Rate> currencyRates = new ArrayList<>();
-    for(Rate rate: rates){
-      if(rate.getCode().equals(currency)){
-        currencyRates.add(rate);
-      }
-    }
+    List<Rate> currencyRates = rates.stream().filter((a) -> {return a.getCode().equals(currency);}).collect(Collectors.toList());
 
     if (currencyRates.size() > 1) {
       logger.error("Got too many currency rates for currency: " + currency);
